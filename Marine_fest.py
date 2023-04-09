@@ -1,8 +1,10 @@
+#!/usr/bin/env python3
 from io import TextIOWrapper
 from msilib.schema import Class, File
 from os import path, walk
 from sys import argv, exit
 from argparse import ArgumentParser
+from pathlib import Path
 
 
 def header():
@@ -14,6 +16,8 @@ def header():
   print(" |_|  |_|\__,_|_|  |_|_| |_|\___| |_|  \___||___/\__| ")
   print("                             ______                  ")
   print("                            |______|                 ")
+  print("")
+  print("~ github.com/TikvahTerminator")
   print("")
 
 class M_Entry:
@@ -149,11 +153,11 @@ class M_Entry:
 
 
 
-def retrieve_Dir_Names(directory: str):
+def retrieve_Dir_Names(directory: Path):
     '''
     Function name: retrieve_Dir_Names
     Args:
-      - directory(String) - literal string of path to directory where animations are, usually assets\dolphin\external
+      - directory(String) - Path object pointing to directory where animations are, usually assets\dolphin\external
 
     This function returns all directory names in the provided directory, as these correspond to manifest entry names.
     If no directories are found, a FileNotFoundError is raised.
@@ -178,15 +182,15 @@ def compare_Animations(directories: list[str], existing_Entries: list[str]):
     manifest_List = [name for name in directories if name not in existing_Entries]
     return manifest_List
 
-def read_existing(manifest_dir: str):
+def read_existing(manifest_dir: Path):
     '''
     Function name: read_existing
     Args: 
-      - manifest_dir(String) - Literal String of path to dir containing manifest.txt, usually assets\dolphin\external
+      - manifest_dir(String) - Path object pointing to dir containing manifest.txt, usually assets\dolphin\external
 
     This function checks for an existing manifest.txt. If it exists, the names of existing entries are collected into a list and returned.
     '''
-    manifest_File = manifest_dir + r'\manifest.txt'
+    manifest_File = manifest_dir / 'manifest.txt'
     existing_Entry = []
     print("\nChecking for existing manifest.txt")
     if not path.isfile(manifest_File):
@@ -209,9 +213,9 @@ def read_existing(manifest_dir: str):
 def main(args):
     header()
     prs = ArgumentParser(description='Creates Version 1 manifest.txt for flipper firmware animations.')
-    prs.add_argument('-d', '--dir', nargs='?', metavar='<PATH>', help="Path to the directory containing all the animations you wish to use", default='.\\')
+    prs.add_argument('-d', '--dir', nargs='?', metavar='<PATH>', help="Path to the directory containing all the animations you wish to use", default=".")
     args = prs.parse_args()
-    root_Working_Dir = args.dir
+    root_Working_Dir = Path(args.dir)
 
     try:
         dir_List = retrieve_Dir_Names(root_Working_Dir)
@@ -221,7 +225,7 @@ def main(args):
             print("There's no animations to add.")
             exit(0)
         manifest_arr = [M_Entry(name) for name in checked]
-        with open(root_Working_Dir+ r'\manifest.txt', 'a') as f:
+        with open(root_Working_Dir / 'manifest.txt', 'a') as f:
             for entry in manifest_arr:
                 entry.export_text(f)
             f.close()
